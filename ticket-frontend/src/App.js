@@ -11,7 +11,7 @@ function App() {
 
   const fetchSeats = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/seats/EXPRESS-101');
+      const res = await axios.get('https://voltreserve-tixs.onrender.com/api/seats/EXPRESS-101');
       setSeats(res.data.data);
     } catch (err) { console.error(err); }
   };
@@ -38,7 +38,7 @@ function App() {
   const handleLock = async (seatNumber) => {
     try {
       setMessage(`Locking Node ${seatNumber}...`);
-      await axios.post('http://localhost:5000/api/book', {
+      await axios.post('https://voltreserve-tixs.onrender.com/api/book', {
         trainId: 'EXPRESS-101', seatNumber, userId: 'NIT_H_Student'
       });
       setSelectedSeat(seatNumber);
