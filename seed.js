@@ -1,31 +1,20 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
-const Seat = require('./models/Seat');
+const Seat = require('./models/Seat'); // Or wherever your Seat model is
+require('dotenv').config();
 
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to DB for seeding...'))
-    .catch(err => console.log(err));
+const seedDB = async () => {
+  await mongoose.connect('mongodb+srv://lakshya:yourpassword@cluster0.mongodb.net/volt_db?retryWrites=true&w=majority');
+  
+  // This creates 50 power nodes for your grid
+  const seats = [];
+  for (let i = 1; i <= 50; i++) {
+    seats.push({ number: i, status: 'idle' });
+  }
 
-const seedSeats = async () => {
-    try {
-        await Seat.deleteMany({}); // Clear existing data
-        const seats = [];
-        
-        for (let i = 1; i <= 50; i++) {
-            seats.push({
-                trainId: "EXPRESS-101",
-                seatNumber: `S${i}`,
-                status: 'AVAILABLE'
-            });
-        }
-
-        await Seat.insertMany(seats);
-        console.log("Successfully seeded 50 seats for EXPRESS-101!");
-        process.exit();
-    } catch (error) {
-        console.error(error);
-        process.exit(1);
-    }
+  await Seat.deleteMany({}); // Clears old data
+  await Seat.insertMany(seats);
+  console.log("⚡ 50 Power Nodes Installed Successfully!");
+  process.exit();
 };
 
-seedSeats();
+seedDB();
