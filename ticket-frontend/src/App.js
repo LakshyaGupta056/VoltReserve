@@ -3,17 +3,22 @@ import axios from 'axios';
 import { Zap, CheckCircle, Armchair, Timer } from 'lucide-react';
 import './App.css';
 
+// Centralized API Base URL
+const API_BASE = "https://voltreserve-tixs.onrender.com/api";
+
 function App() {
   const [seats, setSeats] = useState([]);
   const [message, setMessage] = useState('');
   const [selectedSeat, setSelectedSeat] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(0); // Countdown state
+  const [timeLeft, setTimeLeft] = useState(0);
 
   const fetchSeats = async () => {
     try {
-      const res = await axios.get('https://voltreserve-tixs.onrender.com/api/seats/EXPRESS-101');
+      const res = await axios.get(`${API_BASE}/seats/EXPRESS-101`);
       setSeats(res.data.data);
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+      console.error("Fetch error:", err); 
+    }
   };
 
   useEffect(() => {
@@ -22,7 +27,6 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Timer Logic: Runs every second when a seat is selected
   useEffect(() => {
     if (timeLeft <= 0) {
       if (selectedSeat) {
@@ -38,18 +42,21 @@ function App() {
   const handleLock = async (seatNumber) => {
     try {
       setMessage(`Locking Node ${seatNumber}...`);
-      await axios.post('https://voltreserve-tixs.onrender.com/api/book', {
+      await axios.post(`${API_BASE}/book`, {
         trainId: 'EXPRESS-101', seatNumber, userId: 'NIT_H_Student'
       });
       setSelectedSeat(seatNumber);
-      setTimeLeft(300); // Set to 5 minutes (300 seconds)
+      setTimeLeft(300); 
       fetchSeats();
-    } catch (err) { setMessage(err.response?.data?.error || "Lock failed"); }
+    } catch (err) { 
+      setMessage(err.response?.data?.error || "Lock failed"); 
+    }
   };
 
   const handleConfirm = async () => {
     try {
-      await axios.post('http://localhost:5000/api/confirm', {
+      // FIXED: Removed localhost, now using live Render URL
+      await axios.post(`${API_BASE}/confirm`, {
         trainId: 'EXPRESS-101', seatNumber: selectedSeat
       });
       setMessage("Success: Power Node Allocated!");
@@ -64,7 +71,6 @@ function App() {
     }
   };
 
-  // Helper to format seconds into MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -79,7 +85,7 @@ function App() {
         <p>Smart-Grid Distributed Power Allocation</p>
       </header>
 
-      {message && <div className={`status-banner ${message.includes('Error') ? 'err' : ''}`}>{message}</div>}
+      {message && <div className={`status-banner ${message.includes('Error') || message.includes('failed') ? 'err' : ''}`}>{message}</div>}
 
       {selectedSeat && (
         <div className="confirm-panel">
