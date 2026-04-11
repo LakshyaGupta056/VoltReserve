@@ -19,6 +19,25 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB Connected successfully'))
     .catch(err => console.log('MongoDB connection error:', err));
 
+    // --- EMERGENCY BYPASS ROUTE ---
+app.get('/api/seats/:trainId', async (req, res) => {
+    try {
+        console.log("Bypass active: Fetching nodes directly from DB...");
+        // This skips Redis and gets the data straight from MongoDB
+        const seats = await Seat.find({}); 
+        
+        // This formats it exactly how your React frontend (res.data.data) expects it
+        res.status(200).json({ data: seats }); 
+    } catch (err) {
+        res.status(500).json({ error: "Bypass failed", details: err.message });
+    }
+});
+// ------------------------------
+
+// Register Routes
+app.use('/api', availabilityRoutes);
+app.use('/api', bookingRoutes);
+
 // Register Routes
 app.use('/api', availabilityRoutes);
 app.use('/api', bookingRoutes);
