@@ -14,7 +14,14 @@ router.get('/seats/:trainId', async (req, res) => {
 
     try {
         // 1. Check Redis cache
-        const cachedSeats = await redisClient.get(cacheKey);
+        let cachedSeats = null;
+try {
+    if (redisClient.isOpen) {
+        cachedSeats = await redisClient.get('seats_EXPRESS-101'); // use whatever key name you originally had here
+    }
+} catch (error) {
+    console.log("Redis is still warming up, skipping cache...");
+}
         if (cachedSeats) {
             return res.status(200).json({ source: 'cache', data: JSON.parse(cachedSeats) });
         }
